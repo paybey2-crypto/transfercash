@@ -22,23 +22,30 @@ app.use(session({
 // Load users from JSON
 let users = [];
 try {
-  users = JSON.parse(fs.readFileSync('users.json', 'utf-8'));
+  users = JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'), 'utf-8'));
 } catch (err) {
   console.error('Error loading users.json:', err);
 }
 
+// Middleware to protect dashboard
 function ensureAuth(req, res, next) {
   if (req.session && req.session.authenticated) return next();
   return res.redirect('/?next=' + encodeURIComponent(req.originalUrl));
 }
 
-// Serve static files (public folder)
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve login page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Login endpoint
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const next = req.query.next || '/dashboard.html';
+
   if (!username || !password) {
     return res.status(400).send('Missing username or password. <a href="/">Back</a>');
   }
@@ -58,15 +65,21 @@ app.get('/api/me', ensureAuth, (req, res) => {
   res.json({ username: req.session.user.username });
 });
 
-// Logout
+// Logout endpoint
 app.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/');
   });
 });
 
-const PORT = process.env.PORT || 3000;
+// Serve dashboard page
+app.get('/dashboard.html', ensureAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Transfer app listening on port ${PORT}`);
 });
+
+

@@ -4,136 +4,190 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const helmet = require('helmet');
-const fs = require('fs-extra');
+const fs = require('fs');
 
 const app = express();
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'change_me',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false }
-}));
+// SIMPLE SESSION
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'change_me',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }
+  })
+);
 
-// Load or initialize users
+// LOAD USERS
 let users = [];
 try {
-  users = fs.readJsonSync('users.json');
-} catch (e) {
-  users = [
-    {username:'admin', password:'admin', balance:1000, isAdmin:true},
-    {username:'user1', password:'1234', balance:500}
-  ];
-  fs.writeJsonSync('users.json', users, {spaces:2});
+  users = JSON.parse(fs.readFileSync('users.json', 'utf-8'));
+} catch (err) {
+  console.log("users.json missing — creating new.");
+  fs.writeFileSync('users.json', '[]');
+  users = [];
 }
 
-// Load or initialize cards
+// LOAD CARDS
 let cards = [];
-try { cards = fs.readJsonSync('cards.json'); } 
-catch(e){ fs.writeJsonSync('cards.json', cards); }
+try {
+  cards = JSON.parse(fs.readFileSync('cards.json', 'utf-8'));
+} catch (err) {
+  console.log("cards.json missing — creating new.");
+  fs.writeFileSync('cards.json', '[]');
+  cards = [];
+}
 
-// Load or initialize transactions
+// LOAD TRANSACTIONS
 let transactions = [];
-try { transactions = fs.readJsonSync('transactions.json'); } 
-catch(e){ fs.writeJsonSync('transactions.json', transactions); }
+try {
+  transactions = JSON.parse(fs.readFileSync('transactions.json', 'utf-8'));
+} catch (err) {
+  console.log("transactions.json missing — creating new.");
+  fs.writeFileSync('transactions.json', '[]');
+  transactions = [];
+}
 
-function saveUsers(){ fs.writeJsonSync('users.json', users,{spaces:2}); }
-function saveCards(){ fs.writeJsonSync('cards.json', cards,{spaces:2}); }
-function saveTransactions(){ fs.writeJsonSync('transactions.json', transactions,{spaces:2}); }
-
-function ensureAuth(req,res,next){
-  if(req.session && req.session.authenticated) return next();
+// AUTH MIDDLEWARE
+function ensureAuth(req, res, next) {
+  if (req.session && req.session.authenticated) return next();
   return res.redirect('/login.html');
 }
 
-// Serve static files
-app.use(express.static(path.join(__dirname,'public')));
-app.get('/', (req,res)=>res.sendFile(path.join(__dirname,'public','login.html')));
+// SERVE PUBLIC
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Login
-app.post('/login',(req,res)=>{
-  const {username,password} = req.body;
-  const user = users.find(u=>u.username===username && u.password===password);
-  if(user){
-    req.session.authenticated = true;
-    req.session.user = {username:user.username};
-    return res.redirect('/dashboard.html');
+// ROOT → LOGIN
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// LOGIN
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const found = users.find(u => u.username === username && u.password === password);
+  if (!found) {
+    return res.send("Invalid credentials. <a href='/login.html'>Back</a>");
   }
-  return res.status(401).send('Invalid credentials. <a href="/login.html">Back</a>');
+
+  req.session.authenticated = true;
+  req.session.user = found;
+  res.redirect('/dashboard.html');
 });
 
-// Logout
-app.post('/logout',(req,res)=>{
-  req.session.destroy(()=>res.redirect('/login.html'));
+// GET USER DATA
+app.get('/api/me', ensureAuth, (req, res) => {
+  res.json({
+    username: req.session.user.username,
+    balance: req.session.user.balance
+  });
 });
 
-// API: get current user
-app.get('/api/me',ensureAuth,(req,res)=>{
-  const user = users.find(u=>u.username===req.session.user.username);
-  res.json(user);
+// SEND MONEY TO USER
+app.post('/api/send-user', ensureAuth, (req, res) => {
+  const { recipient, amount, reason } = req.body;
+
+  const sender = users.find(u => u.username === req.session.user.username);
+  const receiver = users.find(u => u.username === recipient);
+
+  if (!receiver) {
+    return res.json({ error: "User not found" });
+  }
+
+  if (sender.balance < amount) {
+    return res.json({ error: "Insufficient funds" });
+  }
+
+  sender.balance -= Number(amount);
+  receiver.balance += Number(amount);
+
+  fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
+
+  transactions.push({
+    type: "user-transfer",
+    from: sender.username,
+    to: receiver.username,
+    amount,
+    reason,
+    date: new Date()
+  });
+
+  fs.writeFileSync('transactions.json', JSON.stringify(transactions, null, 2));
+
+  res.json({ success: true });
 });
 
-// API: get all users (admin)
-app.get('/api/users',ensureAuth,(req,res)=>{
-  const currentUser = users.find(u=>u.username===req.session.user.username);
-  if(!currentUser.isAdmin) return res.status(403).json({error:'Forbidden'});
-  res.json(users);
+// SEND MONEY TO IBAN
+app.post('/api/send-iban', ensureAuth, (req, res) => {
+  const { iban, amount, reason } = req.body;
+
+  const sender = users.find(u => u.username === req.session.user.username);
+
+  if (sender.balance < amount) {
+    return res.json({ error: "Insufficient funds" });
+  }
+
+  sender.balance -= Number(amount);
+
+  fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
+
+  transactions.push({
+    type: "iban-transfer",
+    from: sender.username,
+    iban,
+    amount,
+    reason,
+    date: new Date()
+  });
+
+  fs.writeFileSync('transactions.json', JSON.stringify(transactions, null, 2));
+
+  res.json({ success: true });
 });
 
-// API: get transactions
-app.get('/api/transactions',ensureAuth,(req,res)=>{
-  const currentUser = users.find(u=>u.username===req.session.user.username);
-  let userTxns = transactions.filter(t=>t.from===currentUser.username || t.to===currentUser.username);
-  if(currentUser.isAdmin) userTxns = transactions; // admin sees all
-  res.json(userTxns);
-});
+// CREATE VIRTUAL CARD
+app.post('/api/create-card', ensureAuth, (req, res) => {
+  const username = req.session.user.username;
 
-// API: transfer money
-app.post('/api/transfer',ensureAuth,(req,res)=>{
-  const {toUsername, iban, amount, reason} = req.body;
-  const fromUser = users.find(u=>u.username===req.session.user.username);
-  if(!amount || !reason) return res.json({success:false,error:'Missing fields'});
-  if((fromUser.balance||0)<amount) return res.json({success:false,error:'Insufficient balance'});
+  const userCards = cards.filter(c => c.username === username);
+  if (userCards.length >= 3) {
+    return res.json({ error: "You already have 3 cards" });
+  }
 
-  if(toUsername){
-    const toUser = users.find(u=>u.username===toUsername);
-    if(!toUser) return res.json({success:false,error:'User not found'});
-    toUser.balance += amount;
-    transactions.push({from:fromUser.username,to:toUser.username,amount,reason,date:new Date().toISOString()});
-  } else if(iban){
-    transactions.push({from:fromUser.username,to:iban,amount,reason,date:new Date().toISOString()});
-  } else return res.json({success:false,error:'Provide username or IBAN'});
-
-  fromUser.balance -= amount;
-  saveUsers();
-  saveTransactions();
-  res.json({success:true});
-});
-
-// API: get/create virtual cards
-app.get('/api/cards',ensureAuth,(req,res)=>{
-  const userCards = cards.filter(c=>c.owner===req.session.user.username);
-  res.json(userCards);
-});
-
-app.post('/api/cards',ensureAuth,(req,res)=>{
-  const userCards = cards.filter(c=>c.owner===req.session.user.username);
-  if(userCards.length>=3) return res.json({success:false,error:'Max 3 cards'});
-  
-  const newCard = {
-    owner: req.session.user.username,
-    cardNumber: 4000 ${Math.floor(1000+Math.random()*9000)} ${Math.floor(1000+Math.random()*9000)} ${Math.floor(1000+Math.random()*9000)},
-    cvv: Math.floor(100+Math.random()*900),
-    expire: ${Math.floor(1+Math.random()*12).toString().padStart(2,'0')}/${Math.floor(25+Math.random()*5)},
-    balance: 0
+  const card = {
+    id: Date.now(),
+    username,
+    cardNumber: 4000 ${Math.floor(1000 + Math.random() * 9000)} ${Math.floor(1000 + Math.random() * 9000)} ${Math.floor(1000 + Math.random() * 9000)},
+    cvv: ${Math.floor(100 + Math.random() * 900)},
+    expiry: 0${Math.floor(1 + Math.random() * 8)}/${25 + Math.floor(Math.random() * 5)},
+    created: new Date()
   };
-  cards.push(newCard);
-  saveCards();
-  res.json({success:true,card:newCard});
+
+  cards.push(card);
+  fs.writeFileSync('cards.json', JSON.stringify(cards, null, 2));
+
+  res.json({ success: true, card });
 });
 
-const PORT = process.env.PORT||3000;
-app.listen(PORT,()=>console.log(Transfer app listening on port ${PORT}));
+// GET USER CARDS
+app.get('/api/cards', ensureAuth, (req, res) => {
+  const username = req.session.user.username;
+  res.json(cards.filter(c => c.username === username));
+});
+
+// LOGOUT
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login.html');
+  });
+});
+
+// SERVER START
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(Transfer app running on port ${PORT});
+});

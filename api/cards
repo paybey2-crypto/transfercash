@@ -1,31 +1,20 @@
-.card {
-  width: 320px;
-  height: 200px;
-  border-radius: 15px;
-  padding: 20px;
-  color: #fff;
-  font-size: 18px;
-  background: linear-gradient(135deg, #0045c7, #00b4d8);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-  position: relative;
-  margin-bottom: 15px;
-}
-.card-number {
-  letter-spacing: 2px;
-  font-size: 20px;
-  margin-top: 20px;
-}
-.card-info {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-}
-.show-btn {
-  background: rgba(255,255,255,0.3);
-  border: none;
-  padding: 5px 10px;
-  border-radius: 6px;
-  color: white;
-  cursor: pointer;
-}
+app.post('/api/cards', ensureAuth, (req,res)=>{
+  const userCards = cards.filter(c=>c.owner===req.session.user.username);
+  if(userCards.length >= 3) return res.json({success:false,error:'Max 3 cards allowed'});
 
+  const randomCardNumber = "4" + Math.floor(100000000000000 + Math.random() * 900000000000000); // VISA-like
+  const cvv = "" + Math.floor(100 + Math.random() * 900);
+  const expiry = `12/${2028 + Math.floor(Math.random()*3)}`;
+
+  const card = { 
+    owner: req.session.user.username, 
+    cardNumber: randomCardNumber,
+    cvv,
+    expiry,
+    balance: 0
+  };
+
+  cards.push(card);
+  saveCards();
+  res.json({success:true, card});
+});

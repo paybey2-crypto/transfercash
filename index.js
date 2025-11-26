@@ -1,187 +1,139 @@
-const path = require('path');
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const helmet = require('helmet');
+const fs = require('fs-extra');
 
 const app = express();
+app.use(helmet());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-// SESSION
 app.use(session({
-  secret: process.env.SESSION_SECRET || "secret123",
+  secret: process.env.SESSION_SECRET || 'change_me',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: { secure: false }
 }));
 
-// BODY PARSER
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+// Load or initialize users
+let users = [];
+try {
+  users = fs.readJsonSync('users.json');
+} catch (e) {
+  users = [
+    {username:'admin', password:'admin', balance:1000, isAdmin:true},
+    {username:'user1', password:'1234', balance:500}
+  ];
+  fs.writeJsonSync('users.json', users, {spaces:2});
+}
 
-// STATIC FILES (public/)
-app.use(express.static(path.join(__dirname, "public")));
+// Load or initialize cards
+let cards = [];
+try { cards = fs.readJsonSync('cards.json'); } 
+catch(e){ fs.writeJsonSync('cards.json', cards); }
 
+// Load or initialize transactions
+let transactions = [];
+try { transactions = fs.readJsonSync('transactions.json'); } 
+catch(e){ fs.writeJsonSync('transactions.json', transactions); }
 
-// ---------------- FILE LOADERS ----------------
-function load(file) {
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf-8'));
-  } catch {
-    return [];
+function saveUsers(){ fs.writeJsonSync('users.json', users,{spaces:2}); }
+function saveCards(){ fs.writeJsonSync('cards.json', cards,{spaces:2}); }
+function saveTransactions(){ fs.writeJsonSync('transactions.json', transactions,{spaces:2}); }
+
+function ensureAuth(req,res,next){
+  if(req.session && req.session.authenticated) return next();
+  return res.redirect('/login.html');
+}
+
+// Serve static files
+app.use(express.static(path.join(__dirname,'public')));
+app.get('/', (req,res)=>res.sendFile(path.join(__dirname,'public','login.html')));
+
+// Login
+app.post('/login',(req,res)=>{
+  const {username,password} = req.body;
+  const user = users.find(u=>u.username===username && u.password===password);
+  if(user){
+    req.session.authenticated = true;
+    req.session.user = {username:user.username};
+    return res.redirect('/dashboard.html');
   }
-}
-
-function save(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
-}
-
-let users = load("users.json");
-let cards = load("cards.json");
-let transactions = load("transactions.json");
-
-
-// AUTO CREATE DEFAULT ADMIN
-if (!users.find(u => u.username === "admin")) {
-  users.push({
-    username: "admin",
-    password: "admin",
-    balance: 10000,
-    isAdmin: true
-  });
-  save("users.json", users);
-}
-
-
-// ---------------- MIDDLEWARE ----------------
-function auth(req, res, next) {
-  if (!req.session.user) return res.redirect("/");
-  next();
-}
-
-
-// ---------------- LOGIN ROUTE ----------------
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-
-  const user = users.find(u => u.username === username && u.password === password);
-  if (!user) return res.send("Invalid credentials. <a href='/'>Back</a>");
-
-  req.session.user = {
-    username: user.username,
-    isAdmin: user.isAdmin || false
-  };
-
-  return res.redirect("/dashboard.html");
+  return res.status(401).send('Invalid credentials. <a href="/login.html">Back</a>');
 });
 
-
-// ---------------- API: CURRENT USER ----------------
-app.get("/api/me", auth, (req, res) => {
-  const user = users.find(u => u.username === req.session.user.username);
-  res.json({
-    username: user.username,
-    balance: user.balance,
-    isAdmin: user.isAdmin || false
-  });
+// Logout
+app.post('/logout',(req,res)=>{
+  req.session.destroy(()=>res.redirect('/login.html'));
 });
 
+// API: get current user
+app.get('/api/me',ensureAuth,(req,res)=>{
+  const user = users.find(u=>u.username===req.session.user.username);
+  res.json(user);
+});
 
-// ---------------- API: ADMIN USERS ----------------
-app.get("/api/users", auth, (req, res) => {
-  const me = users.find(u => u.username === req.session.user.username);
-  if (!me.isAdmin) return res.status(403).json({ error: "Not admin." });
-
+// API: get all users (admin)
+app.get('/api/users',ensureAuth,(req,res)=>{
+  const currentUser = users.find(u=>u.username===req.session.user.username);
+  if(!currentUser.isAdmin) return res.status(403).json({error:'Forbidden'});
   res.json(users);
 });
 
-
-// ---------------- SEND MONEY ----------------
-app.post("/api/transfer", auth, (req, res) => {
-  const { toUsername, iban, amount, reason } = req.body;
-
-  const from = users.find(u => u.username === req.session.user.username);
-  const to = users.find(u => u.username === toUsername);
-
-  if (!from) return res.json({ success: false, error: "Sender not found" });
-  if (!to) return res.json({ success: false, error: "User not found" });
-
-  if (from.balance < amount)
-    return res.json({ success: false, error: "Not enough balance" });
-
-  from.balance -= amount;
-  to.balance += amount;
-
-  transactions.push({
-    from: from.username,
-    to: to.username,
-    amount,
-    iban,
-    reason,
-    date: new Date().toISOString()
-  });
-
-  save("users.json", users);
-  save("transactions.json", transactions);
-
-  return res.json({ success: true });
+// API: get transactions
+app.get('/api/transactions',ensureAuth,(req,res)=>{
+  const currentUser = users.find(u=>u.username===req.session.user.username);
+  let userTxns = transactions.filter(t=>t.from===currentUser.username || t.to===currentUser.username);
+  if(currentUser.isAdmin) userTxns = transactions; // admin sees all
+  res.json(userTxns);
 });
 
+// API: transfer money
+app.post('/api/transfer',ensureAuth,(req,res)=>{
+  const {toUsername, iban, amount, reason} = req.body;
+  const fromUser = users.find(u=>u.username===req.session.user.username);
+  if(!amount || !reason) return res.json({success:false,error:'Missing fields'});
+  if((fromUser.balance||0)<amount) return res.json({success:false,error:'Insufficient balance'});
 
-// ---------------- TRANSACTIONS ----------------
-app.get("/api/transactions", auth, (req, res) => {
-  const me = req.session.user.username;
+  if(toUsername){
+    const toUser = users.find(u=>u.username===toUsername);
+    if(!toUser) return res.json({success:false,error:'User not found'});
+    toUser.balance += amount;
+    transactions.push({from:fromUser.username,to:toUser.username,amount,reason,date:new Date().toISOString()});
+  } else if(iban){
+    transactions.push({from:fromUser.username,to:iban,amount,reason,date:new Date().toISOString()});
+  } else return res.json({success:false,error:'Provide username or IBAN'});
 
-  const list = transactions.filter(t => t.to === me || t.from === me);
-  res.json(list);
+  fromUser.balance -= amount;
+  saveUsers();
+  saveTransactions();
+  res.json({success:true});
 });
 
-
-// ---------------- VIRTUAL CARDS ----------------
-app.get("/api/cards", auth, (req, res) => {
-  const me = req.session.user.username;
-  const userCards = cards.filter(c => c.owner === me);
+// API: get/create virtual cards
+app.get('/api/cards',ensureAuth,(req,res)=>{
+  const userCards = cards.filter(c=>c.owner===req.session.user.username);
   res.json(userCards);
 });
 
-app.post("/api/cards", auth, (req, res) => {
-  const me = req.session.user.username;
-  const userCards = cards.filter(c => c.owner === me);
-
-  if (userCards.length >= 3)
-    return res.json({ success: false, error: "Max 3 cards allowed" });
-
+app.post('/api/cards',ensureAuth,(req,res)=>{
+  const userCards = cards.filter(c=>c.owner===req.session.user.username);
+  if(userCards.length>=3) return res.json({success:false,error:'Max 3 cards'});
+  
   const newCard = {
-    id: Date.now(),
-    owner: me,
-    cardNumber: "52" + Math.floor(Math.random() * 1000000000000),
-    expiry: "12/27",
-    cvv: Math.floor(100 + Math.random() * 899),
+    owner: req.session.user.username,
+    cardNumber: 4000 ${Math.floor(1000+Math.random()*9000)} ${Math.floor(1000+Math.random()*9000)} ${Math.floor(1000+Math.random()*9000)},
+    cvv: Math.floor(100+Math.random()*900),
+    expire: ${Math.floor(1+Math.random()*12).toString().padStart(2,'0')}/${Math.floor(25+Math.random()*5)},
     balance: 0
   };
-
   cards.push(newCard);
-  save("cards.json", cards);
-
-  return res.json({ success: true, card: newCard });
+  saveCards();
+  res.json({success:true,card:newCard});
 });
 
-
-// ---------------- LOGOUT ----------------
-app.post("/logout", (req, res) => {
-  req.session.destroy(() => res.redirect("/"));
-});
-
-
-// ---------------- START SERVER ----------------
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`TransferCash app running on ${PORT}`);
-});
-
+const PORT = process.env.PORT||3000;
+app.listen(PORT,()=>console.log(Transfer app listening on port ${PORT}));

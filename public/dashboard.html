@@ -1,19 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+</head>
+<body>
+<h1>Dashboard</h1>
 <div id="welcome">Loading...</div>
 
+<h2>Users:</h2>
+<ul id="userList"></ul>
+
+<h2>Transfer Money:</h2>
+<form id="transferForm">
+  <input type="text" name="toUsername" placeholder="Username">
+  <input type="number" name="amount" placeholder="Amount">
+  <button type="submit">Send</button>
+</form>
+
+<form id="logoutForm" method="POST" action="/logout">
+  <button type="submit">Logout</button>
+</form>
+
 <script>
-async function init() {
-  try {
-    const r = await fetch('/api/me', { credentials: 'same-origin' });
-    if (r.status === 200) {
-      const u = await r.json();
-      document.getElementById('welcome').innerHTML =
-        '<strong>Welcome, ' + u.username + '</strong><p>This is a demo dashboard.</p>';
-    } else {
-      document.getElementById('welcome').innerHTML = 'Could not load user data.';
-    }
-  } catch(e) {
-    document.getElementById('welcome').innerHTML = 'Could not load user data.';
+async function loadDashboard() {
+  const r = await fetch('/api/me', { credentials: 'same-origin' });
+  if(r.status !== 200) {
+    document.getElementById('welcome').innerHTML = 'Could not load user.';
+    return;
+  }
+  const user = await r.json();
+  document.getElementById('welcome').innerHTML = `<strong>Welcome, ${user.username}</strong>`;
+
+  if(user.username === 'admin') {
+    const res = await fetch('/api/users', { credentials: 'same-origin' });
+    const users = await res.json();
+    const ul = document.getElementById('userList');
+    ul.innerHTML = '';
+    users.forEach(u => {
+      const li = document.createElement('li');
+      li.textContent = `${u.username}: $${u.balance}`;
+      ul.appendChild(li);
+    });
   }
 }
-init();
+
+document.getElementById('transferForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const toUsername = e.target.toUsername.value;
+  const amount = parseFloat(e.target.amount.value);
+
+  const res = await fetch('/api/transfer', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ toUsername, amount })
+  });
+
+  const data = await res.json();
+  if(data.success) {
+    alert('Transfer successful!');
+    loadDashboard();
+  } else {
+    alert('Error: ' + JSON.stringify(data));
+  }
+});
+
+loadDashboard();
 </script>
+</body>
+</html>

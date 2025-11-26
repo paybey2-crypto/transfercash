@@ -32,14 +32,10 @@ ul { list-style:none; padding-left:0; }
   <div class="section">
     <h2>Send Money</h2>
     <form id="sendForm">
-      <input type="text" name="username" placeholder="Username">
-      <input type="text" name="iban" placeholder="IBAN">
-      <input type="number" name="amount" placeholder="Amount">
-      <select name="method">
-        <option value="">Payment Method</option>
-        <option value="card">Card</option>
-        <option value="bank">Bank Transfer</option>
-      </select>
+      <input type="text" name="username" placeholder="Username" required>
+      <input type="text" name="iban" placeholder="IBAN" required>
+      <input type="number" name="amount" placeholder="Amount" required>
+      <input type="text" name="reason" placeholder="Reason for payment" required>
       <button type="submit">Send</button>
     </form>
   </div>
@@ -48,6 +44,11 @@ ul { list-style:none; padding-left:0; }
     <h2>Your Virtual Cards</h2>
     <ul id="cardList"></ul>
     <button id="createCardBtn">Create new card</button>
+  </div>
+
+  <div class="section">
+    <h2>Transactions</h2>
+    <ul id="txList"></ul>
   </div>
 
   <div class="section" id="adminSection" style="display:none;">
@@ -73,20 +74,36 @@ async function loadDashboard(){
     }
   }
 
-  // Load cards
+  // Virtual Cards
   const cardsRes = await fetch('/api/cards',{credentials:'same-origin'});
   const cards = await cardsRes.json();
   const ulCards = document.getElementById('cardList'); ulCards.innerHTML='';
   cards.forEach(c=>{ const li=document.createElement('li'); li.textContent=`${c.cardNumber} | Balance: $${c.balance}`; ulCards.appendChild(li); });
+
+  // Transactions
+  const txRes = await fetch('/api/transactions',{credentials:'same-origin'});
+  const txs = await txRes.json();
+  const ulTx = document.getElementById('txList'); ulTx.innerHTML='';
+  txs.forEach(t=>{ 
+    const li=document.createElement('li'); 
+    li.textContent = `${t.date} | From: ${t.from} To: ${t.to} Amount: $${t.amount} Reason: ${t.reason}`; 
+    ulTx.appendChild(li);
+  });
 }
 
 document.getElementById('sendForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const form = e.target;
-  const res = await fetch('/api/transfer',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-    toUsername: form.username.value,
-    amount: parseFloat(form.amount.value)
-  })});
+  const res = await fetch('/api/transfer',{
+    method:'POST', credentials:'same-origin',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      toUsername: form.username.value,
+      iban: form.iban.value,
+      amount: parseFloat(form.amount.value),
+      reason: form.reason.value
+    })
+  });
   const data = await res.json();
   if(data.success) alert('Transfer successful'); else alert('Error: '+data.error);
   loadDashboard();

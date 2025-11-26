@@ -79,7 +79,19 @@ async function loadDashboard(){
   const cardsRes = await fetch('/api/cards',{credentials:'same-origin'});
   const cards = await cardsRes.json();
   const ulCards = document.getElementById('cardList'); ulCards.innerHTML='';
-  cards.forEach(c=>{ const li=document.createElement('li'); li.textContent=`${c.cardNumber} | Balance: $${c.balance}`; ulCards.appendChild(li); });
+  function toggleCard(id, realNum, realCvv) {
+  const numEl = document.getElementById("num-" + id);
+  const cvvEl = document.getElementById("cvv-" + id);
+
+  if (numEl.innerHTML.includes("*")) {
+    numEl.innerHTML = realNum;
+    cvvEl.innerHTML = realCvv;
+  } else {
+    numEl.innerHTML = realNum.replace(/\d(?=\d{4})/g, "*");
+    cvvEl.innerHTML = "***";
+  }
+}
+
 
   // Transactions
   const txRes = await fetch('/api/transactions',{credentials:'same-origin'});

@@ -32,6 +32,7 @@ function ensureAuth(req, res, next) {
   return res.redirect('/?next=' + encodeURIComponent(req.originalUrl));
 }
 
+// Serve static files (public folder)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Login endpoint
@@ -65,6 +66,7 @@ app.post('/logout', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(Transfer app listening on port ${PORT});
 });

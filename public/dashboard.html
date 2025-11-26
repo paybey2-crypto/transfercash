@@ -3,27 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>Dashboard</title>
-<style>
-body { font-family: Arial; background:#f0f2f5; margin:0; color:#333; }
-.header { display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:#007BFF; color:#fff; }
-.header button { padding:7px 12px; border:none; border-radius:4px; cursor:pointer; background:#fff; color:#007BFF; font-weight:bold; }
-.container { padding:20px 30px; }
-.section { background:#fff; padding:20px; border-radius:8px; margin-bottom:20px; box-shadow:0 3px 6px rgba(0,0,0,0.1); }
-form { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-form input, form select { padding:7px; border-radius:4px; border:1px solid #ccc; flex:1; min-width:100px; }
-form input[type=number]{ width:100px; flex:none; }
-form select { width:150px; flex:none; }
-form button { padding:7px 12px; border:none; border-radius:4px; cursor:pointer; background:#007BFF; color:#fff; font-weight:bold; }
-ul { list-style:none; padding-left:0; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="header">
-  <div id="welcome">Loading...</div>
+<header>
+  <h1>TransferCash</h1>
   <form method="POST" action="/logout"><button>Logout</button></form>
-</div>
+</header>
 
-<div class="card-container" id="cardList"></div>
+<div class="container">
 
   <div class="section">
     <h2>Your balance:</h2>
@@ -33,8 +21,8 @@ ul { list-style:none; padding-left:0; }
   <div class="section">
     <h2>Send Money</h2>
     <form id="sendForm">
-      <input type="text" name="username" placeholder="Username" required>
-      <input type="text" name="iban" placeholder="IBAN" required>
+      <input type="text" name="username" placeholder="Username">
+      <input type="text" name="iban" placeholder="IBAN">
       <input type="number" name="amount" placeholder="Amount" required>
       <input type="text" name="reason" placeholder="Reason for payment" required>
       <button type="submit">Send</button>
@@ -43,13 +31,13 @@ ul { list-style:none; padding-left:0; }
 
   <div class="section">
     <h2>Your Virtual Cards</h2>
-    <ul id="cardList"></ul>
+    <div id="cardList"></div>
     <button id="createCardBtn">Create new card</button>
   </div>
 
   <div class="section">
     <h2>Transactions</h2>
-    <ul id="txList"></ul>
+    <ul id="txnList"></ul>
   </div>
 
   <div class="section" id="adminSection" style="display:none;">
@@ -58,78 +46,6 @@ ul { list-style:none; padding-left:0; }
   </div>
 </div>
 
-<script>
-async function loadDashboard(){
-  const r = await fetch('/api/me',{credentials:'same-origin'});
-  const user = await r.json();
-  document.getElementById('welcome').textContent = `Welcome, ${user.username}`;
-  document.getElementById('balance').textContent = user.balance;
-
-  if(user.isAdmin){
-    const usersRes = await fetch('/api/users',{credentials:'same-origin'});
-    if(usersRes.ok){
-      const usersList = await usersRes.json();
-      document.getElementById('adminSection').style.display='block';
-      const ul = document.getElementById('userList'); ul.innerHTML='';
-      usersList.forEach(u=>{ const li=document.createElement('li'); li.textContent=`${u.username}: $${u.balance}`; ul.appendChild(li);});
-    }
-  }
-
-  // Virtual Cards
-  const cardsRes = await fetch('/api/cards',{credentials:'same-origin'});
-  const cards = await cardsRes.json();
-  const ulCards = document.getElementById('cardList'); ulCards.innerHTML='';
-  function toggleCard(id, realNum, realCvv) {
-  const numEl = document.getElementById("num-" + id);
-  const cvvEl = document.getElementById("cvv-" + id);
-
-  if (numEl.innerHTML.includes("*")) {
-    numEl.innerHTML = realNum;
-    cvvEl.innerHTML = realCvv;
-  } else {
-    numEl.innerHTML = realNum.replace(/\d(?=\d{4})/g, "*");
-    cvvEl.innerHTML = "***";
-  }
-}
-
-
-  // Transactions
-  const txRes = await fetch('/api/transactions',{credentials:'same-origin'});
-  const txs = await txRes.json();
-  const ulTx = document.getElementById('txList'); ulTx.innerHTML='';
-  txs.forEach(t=>{ 
-    const li=document.createElement('li'); 
-    li.textContent = `${t.date} | From: ${t.from} To: ${t.to} Amount: $${t.amount} Reason: ${t.reason}`; 
-    ulTx.appendChild(li);
-  });
-}
-
-document.getElementById('sendForm').addEventListener('submit', async e=>{
-  e.preventDefault();
-  const form = e.target;
-  const res = await fetch('/api/transfer',{
-    method:'POST', credentials:'same-origin',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      toUsername: form.username.value,
-      iban: form.iban.value,
-      amount: parseFloat(form.amount.value),
-      reason: form.reason.value
-    })
-  });
-  const data = await res.json();
-  if(data.success) alert('Transfer successful'); else alert('Error: '+data.error);
-  loadDashboard();
-});
-
-document.getElementById('createCardBtn').addEventListener('click', async ()=>{
-  const res = await fetch('/api/cards',{method:'POST',credentials:'same-origin'});
-  const data = await res.json();
-  if(data.success) alert('Card created: '+data.card.cardNumber); else alert('Error: '+data.error);
-  loadDashboard();
-});
-
-loadDashboard();
-</script>
+<script src="main.js"></script>
 </body>
 </html>

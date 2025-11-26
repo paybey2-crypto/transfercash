@@ -21,12 +21,39 @@ async function loadDashboard(){
   const cards = await cardsRes.json();
   const cardList = document.getElementById('cardList');
   cardList.innerHTML = '';
-  cards.forEach(c=>{
-    const div = document.createElement('div');
-    div.className = 'virtual-card';
-    div.innerHTML = `<div>Card: ${c.cardNumber}</div><div>Balance: $${c.balance}</div>`;
-    cardList.appendChild(div);
-  });
+  cards.forEach(c => {
+  const div = document.createElement('div');
+  div.className = 'real-card';
+
+  div.innerHTML = `
+    <div class="card-chip"></div>
+
+    <div class="card-number">
+      ${c.cardNumber.replace(/(.{4})/g, "$1 ")}
+    </div>
+
+    <div class="card-info-row">
+      <div>
+        <div class="card-label">VALID THRU</div>
+        <div>${c.expiry}</div>
+      </div>
+      <div>
+        <div class="card-label">CVV</div>
+        <div>${c.cvv}</div>
+      </div>
+    </div>
+
+    <div class="card-info-row">
+      <div class="card-label">BALANCE</div>
+      <div>$${c.balance}</div>
+    </div>
+
+    <div class="card-logo">TransferCard</div>
+  `;
+
+  cardList.appendChild(div);
+});
+
 
   // Transactions
   const txnsRes = await fetch('/api/transactions',{credentials:'same-origin'});

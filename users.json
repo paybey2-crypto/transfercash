@@ -7,11 +7,11 @@
   {
     "username": "user1",
     "password": "UserPass1!",
-    "balance": 500
+    "balance": 0
   },
   {
     "username": "user2",
     "password": "UserPass2!",
-    "balance": 250
+    "balance": 0
   }
 ]

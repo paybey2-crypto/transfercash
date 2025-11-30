@@ -1,26 +1,23 @@
-<div class="box3">
-<form action="&quot;">
-<fieldset>
-<legend>Login</legend>
- 
-Login to complete your purchase.
- 
-<label>Username: </label>
- 
-<label>Password: </label>
- 
-</fieldset>
-</form>
- 
-&lt; !–end of login form–&gt;
-<form action="”&quot;">
-<fieldset>
-<legend>Register</legend>
- 
-If you do not already have an account, please create a new account to register.
- 
-</fieldset>
-</form>
- 
-&lt; !–end of register form–&gt;</div>
-&lt; !–end of box3–&gt;
+<oblik akcija="action_page.php" metoda="post">
+  <div klasa="imgcontainer">
+    <img src="img_avatar2.png" alt="Avatar" klasa="avatar">
+  </div>
+
+  <div klasa="kontejner">
+    <oznaka za="uname"><b>Korisničko ime</b></oznaka>
+    <ulaz tip="tekst" rezervirano mjesto="Unesite korisničko ime" ime="uname" zahtijevano>
+
+    <oznaka za="psw"><b>Lozinka</b></oznaka>
+    <ulaz tip="lozinka" rezervirano mjesto="Unesite lozinku" ime="psw" zahtijevano>
+
+    <gumb tip="pošalji">Prijava</gumb>
+    <oznaka>
+      <ulaz tip="checkbox" provjereno="provjereno" ime="zapamti"> Zapamti me
+    </oznaka>
+  </div>
+
+  <div klasa="kontejner" stil="boja pozadine:#f1f1f1">
+    <gumb tip="gumb" klasa="cancelbtn">Otkaži</gumb>
+    <raspon klasa="psw">Zaboravio <a href="#">lozinka?</a></span>
+  </div>
+</obrazac>

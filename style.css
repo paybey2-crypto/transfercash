@@ -1,71 +1,130 @@
-/* Obrubljeni oblik */
-oblik {
-  granica: 3px čvrsta #f1f1f1;
-}
-
-/* Ulazi pune širine */
-ulaz[tip=tekst], ulaz[tip=lozinka] {
-  širina: 100%;
-  podstava: 12px 20px;
-  margina: 8px 0;
-  prikaz: inline blok;
-  granica: 1px čvrsta #ccc;
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+*{
+  marža: 0;
+  podstava: 0;
+  nacrt: nema;
   veličina kutije: border-box;
+  font-family: 'Poppins', sans-serif;
 }
-
-/* Postavite stil za sve gumbe */
-gumb {
-  boja pozadine: #04AA6D;
-  boja: bijela;
-  podstava: 14px 20px;
-  margina: 8px 0;
-  granica: nijedan;
-  kursor: pokazivač;
+tijelo{
+  visina: 100vh;
   širina: 100%;
+  pozadina: linearni gradijent (115 stupnjeva, #56d8e4 10%, #9f01ea 90%);
+}
+.show-btn{
+  pozadina: #fff;
+  padding: 10px 20px;
+  veličina fonta: 20px;
+  težina fonta: 500;
+  boja: #3498db;
+  pokazivač: pokazivač;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+.show-btn, .kontejner{
+  položaj: apsolutni;
+  vrh: 50%;
+  lijevo: 50%;
+  transformiraj: prevedi(-50%, -50%);
 }
 
-/* Dodajte efekt lebdenja za gumbe */
-gumb: hover {
-  neprozirnost: 0.8;
+input[type="checkbox"]{
+  prikaz: nema;
 }
-
-/* Dodatni stil za gumb za otkazivanje (crveno) */
-.cancelbtn {
-  širina: auto;
-  podstava: 10px 18px;
-  boja pozadine: #f44336;
+.kontejner{
+  prikaz: nema;
+  pozadina: #fff;
+  širina: 410px;
+  podstava: 30px;
+  sjenilo: 0 0 8px rgba(0,0,0,0.1);
 }
-
-/* Sredite sliku avatara unutra ovaj spremnik */
-.imgcontainer {
+#show:provjereno ~ .kontejner{
+  prikaz: blok;
+}
+.kontejner .close-btn{
+  položaj: apsolutni;
+  desno: 20px;
+  top: 15px;
+  veličina fonta: 18px;
+  pokazivač: pokazivač;
+}
+.kontejner .close-btn:hover{
+  boja: #3498db;
+}
+.kontejner .tekst{
+  font-veličina: 35px;
+  težina fonta: 600;
   poravnanje teksta: centar;
-  margina: 24px 0 12px 0;
 }
-
-/* Avatar slika */
-img.avatar {
-  širina: 40%;
-  granični radijus: 50%;
+.kontejnerski obrazac{
+  margin-top: -20px;
 }
-
-/* Dodajte podstavu u spremnike */
-.kontejner {
-  podstava: 16px;
+.kontejnerski obrazac .data{
+  visina: 45px;
+  širina: 100%;
+  marža: 40px 0;
 }
-
-/* Tekst "Zaboravljena lozinka" */
-span.psw {
-  plovak: desno;
-  padding-top: 16px;
+obrazac .oznaka podataka{
+  veličina fonta: 18px;
 }
-
-/* Promjena stilova za raspon i gumb za otkazivanje na ekstra malim zaslonima */
-@media zaslon i (maksimalna širina: 300px) {
-  span.psw {
-    prikaz: blok;
-    plovak: nijedan;
-  }
-  .cancelbtn {
-    širina: 100%;
-  }
+obrazac .unos podataka{
+  visina: 100%;
+  širina: 100%;
+  padding-left: 10px;
+  veličina fonta: 17px;
+  granica: 1 px čvrsto srebro;
+}
+obrazac .unos podataka:focus{
+  boja obruba: #3498db;
+  širina ruba-dna: 2px;
+}
+obrazac .forgot-pass{
+  margin-top: -8px;
+}
+obrazac .forgot-pass a{
+  boja: #3498db;
+  tekstualna dekoracija: nema;
+}
+obrazac .forgot-pass a:hover{
+  tekstualna dekoracija: podcrtano;
+}
+obrazac.btn{
+  marža: 30px 0;
+  visina: 45px;
+  širina: 100%;
+  položaj: relativni;
+  preljev: skriven;
+}
+obrazac .btn.inner{
+  visina: 100%;
+  širina: 300%;
+  položaj: apsolutni;
+  lijevo: -100%;
+  z-index: -1;
+  pozadina: -webkit-linear-gradient(desno, #56d8e4, #9f01ea, #56d8e4, #9f01ea);
+  prijelaz: sve 0,4s;
+}
+obrazac .btn:hover.inner{
+  lijevo: 0;
+}
+obrazac .btn gumb{
+  visina: 100%;
+  širina: 100%;
+  pozadina: nema;
+  granica: nema;
+  boja: #fff;
+  veličina fonta: 18px;
+  težina fonta: 500;
+  transformacija teksta: velika slova;
+  razmak između slova: 1px;
+  pokazivač: pokazivač;
+}
+obrazac .signup-link{
+  poravnanje teksta: centar;
+}
+obrazac .signup-link a{
+  boja: #3498db;
+  tekstualna dekoracija: nema;
+}
+obrazac .signup-link a:hover{
+  tekstualna dekoracija: podcrtano;
 }

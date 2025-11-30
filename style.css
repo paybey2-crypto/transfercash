@@ -1,129 +1,144 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
-*{
-  margina: 0;
-  podstava: 0;
-  obris: nijedan;
-  veličina kutije: border-box;
-  font-familija: 'Poppins', sans-serif;
+/* Veza Google fontova */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+/* Resetiranje zadanog stila i postavljanje obitelji fontova */
+* {
+    margina: 0;
+    podstava: 0;
+    veličina kutije: border-box;
+    font-familija: "Montserrat", sans-serif;
 }
-tijelo{
-  visina: 100vh;
-  širina: 100%;
-  pozadina: linearni gradijent(115 deg, #56d8e4 10%, #9f01ea 90%);
+tijelo {
+    širina: 100%;
+    min-visina: 100vh;
+    podstava: 0 10px;
+    prikaz: flex;
+    pozadina: #626cd6;
+    opravdanje-sadržaj: centar;
+    poravnajte stavke: centar;
 }
-.show-btn{
-  pozadina: #fff;
-  podstava: 10px 20px;
-  veličina fonta: 20px;
-  težina fonta: 500;
-  boja: #3498db;
-  kursor: pokazivač;
-  kutija-sjena: 0px 0px 10px rgba(0,0,0,0.1);
+/* Stiliziranje obrasca za prijavu */
+.prijava_obrazac {
+    širina: 100%;
+    maksimalna širina: 435px;
+    pozadina: #fff;
+    granični radijus: 6px;
+    podstava: 41px 30px;
+    kutija-sjena: 0 10px 20px rgba(0, 0, 0, 0,15);
 }
-.show-btn, .kontejner{
-  položaj: apsolutno;
-  top: 50%;
-  lijevo: 50%;
-  transformirati: prevedi(-50%, -50%);
+.prijava_obrazac h3 {
+    veličina fonta: 20px;
+    poravnanje teksta: centar;
 }
-ulaz[tip="checkbox"]{
-  prikaz: nijedan;
+/* Google & Apple stiliziranje gumba */
+.prijava_obrazac .login_opcija {
+    prikaz: flex;
+    širina: 100%;
+    opravdanje-sadržaj: razmak između;
+    poravnajte stavke: centar;
 }
-.kontejner{
-  prikaz: nijedan;
-  pozadina: #fff;
-  širina: 410px;
-  podstava: 30px;
-  kutija-sjena: 0 0 8px rgba(0,0,0,0.1);
+.prijava_obrazac .login_opcija .opcija {
+    širina: calc(100% / 2 - 12px);
 }
-#show:provjereno ~ .kontejner{
-  prikaz: blok;
+.prijava_obrazac .login_opcija .opcija a {
+    visina: 56px;
+    prikaz: flex;
+    opravdanje-sadržaj: centar;
+    poravnajte stavke: centar;
+    gap: 12px;
+    pozadina: #F8F8FB;
+    granica: 1px čvrsta #DADAF2;
+    granični radijus: 5px;
+    margina: 34px 0 24px 0;
+    tekstualna dekoracija: nijedan;
+    boja: #171645;
+    težina fonta: 500;
+    tranzicija: 0.2lakoća;
 }
-.kontejner .zatvori-btn{
-  položaj: apsolutno;
-  desno: 20px;
-  top: 15px;
-  veličina fonta: 18px;
-  kursor: pokazivač;
+.prijava_obrazac .login_opcija .opcija a:hover {
+    pozadina: #ededf5;
+    boja obruba: #626cd6;
 }
-.kontejner .zatvori-btn:hover{
-  boja: #3498db;
+.prijava_obrazac .login_opcija .opcija a img {
+    maksimalna širina: 25px;
 }
-.kontejner .tekst{
-  veličina fonta: 35px;
-  težina fonta: 600;
-  poravnanje teksta: centar;
+.prijava_obrazac p {
+    poravnanje teksta: centar;
+    težina fonta: 500;
 }
-.kontejner oblik{
-  margin-top: -20px;
+.prijava_obrazac .separator {
+    položaj: relativno;
+    margina-dno: 24px;
 }
-.kontejner oblik .podaci{
-  visina: 45px;
-  širina: 100%;
-  margina: 40px 0;
+/* Login opcija separator styling */
+.prijava_obrazac .separator raspon {
+    pozadina: #fff;
+    z-index: 1;
+    podstava: 0 10px;
+    položaj: relativno;
 }
-oblik .podaci oznaka{
-  veličina fonta: 18px;
+.prijava_obrazac .separator::poslije {
+    sadržaj: '';
+    položaj: apsolutno;
+    širina: 100%;
+    top: 50%;
+    lijevo: 0;
+    visina: 1px;
+    pozadina: #C2C2C2;
+    prikaz: blok;
 }
-oblik .podaci ulaz{
-  visina: 100%;
-  širina: 100%;
-  padding-lijevo: 10px;
-  veličina fonta: 17px;
-  granica: 1px čvrsto srebro;
+oblik .input_box oznaka {
+    prikaz: blok;
+    težina fonta: 500;
+    margina-dno: 8px;
 }
-oblik .podaci ulaz:fokus{
-  boja obruba: #3498db;
-  širina granice-dna: 2px;
+/* Stiliziranje ulaznog polja */
+oblik .input_box ulaz {
+    širina: 100%;
+    visina: 57px;
+    granica: 1px čvrsta #DADAF2;
+    granični radijus: 5px;
+    obris: nijedan;
+    pozadina: #F8F8FB;
+    veličina fonta: 17px;
+    podstava: 0px 20px;
+    margina-dno: 25px;
+    tranzicija: 0.2lakoća;
 }
-oblik .zaboravio-prošao{
-  margin-top: -8px;
+oblik .input_box ulaz:fokus {
+    boja obruba: #626cd6;
 }
-oblik .zaboravio-prošao a{
-  boja: #3498db;
-  tekstualna dekoracija: nijedan;
+oblik .input_box .password_title {
+    prikaz: flex;
+    opravdanje-sadržaj: razmak između;
+    poravnanje teksta: centar;
 }
-oblik .zaboravio-prošao a:hover{
-  tekstualna dekoracija: podcrtati;
+oblik .input_box {
+    položaj: relativno;
 }
-oblik .btn{
-  margina: 30px 0;
-  visina: 45px;
-  širina: 100%;
-  položaj: relativno;
-  prelijevanje: skriveno;
+a {
+    tekstualna dekoracija: nijedan;
+    boja: #626cd6;
+    težina fonta: 500;
 }
-oblik .btn .inner{
-  visina: 100%;
-  širina: 300%;
-  položaj: apsolutno;
-  lijevo: -100%;
-  z-index: -1;
-  pozadina: -webkit-linear-gradient(točno, #56d8e4, #9f01ea, #56d8e4, #9f01ea);
-  tranzicija: svi 0.4s;
+a:hover {
+    tekstualna dekoracija: podcrtati;
 }
-oblik .btn:hover .inner{
-  lijevo: 0;
+/* Stiliziranje gumba za prijavu */
+oblik gumb {
+    širina: 100%;
+    visina: 56px;
+    granični radijus: 5px;
+    granica: nijedan;
+    obris: nijedan;
+    pozadina: #626CD6;
+    boja: #fff;
+    veličina fonta: 18px;
+    težina fonta: 500;
+    transformacija teksta: velika slova;
+    kursor: pokazivač;
+    margina-dno: 28px;
+    tranzicija: 0.3lakoća;
 }
-oblik .btn gumb{
-  visina: 100%;
-  širina: 100%;
-  pozadina: nijedan;
-  granica: nijedan;
-  boja: #fff;
-  veličina fonta: 18px;
-  težina fonta: 500;
-  transformacija teksta: velika slova;
-  razmak između slova: 1px;
-  kursor: pokazivač;
-}
-oblik .signup-link{
-  poravnanje teksta: centar;
-}
-oblik .signup-link a{
-  boja: #3498db;
-  tekstualna dekoracija: nijedan;
-}
-oblik .signup-link a:hover{
-  tekstualna dekoracija: podcrtati;
+oblik gumb:hover {
+    pozadina: #4954d0;
 }

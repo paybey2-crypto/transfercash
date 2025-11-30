@@ -1,54 +1,46 @@
 <!DOCTYPE html>
-<!-- Izvorni kodovi prema CodingNepal - www.codingnepalweb.com -->
 <html lang="en">
-<glava>
-  <meta skup znakova="UTF-8" />
-  <meta ime="viewport" sadržaj="width=širina uređaja, početna skala=1,0" />
-  <naslov>Obrazac za prijavu u HTML i CSS | CodingNepal</naslov>
-  <link rel="stilski list" href="style.css" />
-</glava>
-<tijelo>
-  <div klasa="prijava_obrazac">
-    <!- Spremnik obrasca za prijavu -->
-    <oblik akcija="#">
-      <h3>Prijavite se sa</h3>
-      <div klasa="login_option">
-        <!-- Google gomb -->
-        <div klasa="opcija">
-          <a href="#">
-            <img src="logos/google.png" alt="Google" />
-            <raspon>Google</raspon>
-          </a>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glowing Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-box">
+    <h2>LOGIN</h2>
+    <form id="loginForm">
+        <div class="user-box">
+            <input type="text" id="username" required>
+            <label>Username</label>
         </div>
-        <!-- Apple gumb -->
-        <div klasa="opcija">
-          <a href="#">
-            <img src="logos/apple.png" alt="Jabuka" />
-            <raspon>Jabuka</raspon>
-          </a>
+        <div class="user-box">
+            <input type="password" id="password" required>
+            <label>Password</label>
         </div>
-      </div>
-      <!-- Razdjelnik opcija prijave -->
-      <p klasa="separator">
-        <raspon>ili</raspon>
-      </p>
-      <!-- Email ulaz kutija -->
-      <div klasa="input_box">
-        <oznaka za="e-mail">Email</oznaka>
-        <ulaz tip="e-mail" id="e-mail" rezervirano mjesto="Unesite adresu e-pošte" zahtijevano />
-      </div>
-      <!-- Paswwrod ulazna kutija -->
-      <div klasa="input_box">
-        <div klasa="password_title">
-          <oznaka za="lozinka">Lozinka</oznaka>
-          <a href="#">Zaboravili ste lozinku?</a>
-        </div>
-        <ulaz tip="lozinka" id="lozinka" rezervirano mjesto="Unesite svoju lozinku" zahtijevano />
-      </div>
-       <!-- Gumb za prijavu -->
-      <gumb tip="podnesi">Prijavite se</gumb>
-      <p klasa="sign_up">Nemate račun? <a href="#">Prijavite se</a></p>
-    </oblik>
-  </div>
-</tijelo>
+        <button type="submit" class="btn">Sign In</button>
+    </form>
+    <p id="message"></p>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const res = await fetch("/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                username: username.value,
+                password: password.value
+            })
+        });
+
+        const data = await res.json();
+        document.getElementById("message").textContent = data.message;
+    });
+</script>
+
+</body>
 </html>

@@ -1,6 +1,4 @@
-/* Veza Google fontova */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-/* Resetiranje zadanog stila i postavljanje obitelji fontova */
 * {
     margina: 0;
     podstava: 0;
@@ -16,7 +14,7 @@ tijelo {
     opravdanje-sadržaj: centar;
     poravnajte stavke: centar;
 }
-/* Stiliziranje obrasca za prijavu */
+
 .prijava_obrazac {
     širina: 100%;
     maksimalna širina: 435px;
@@ -29,7 +27,7 @@ tijelo {
     veličina fonta: 20px;
     poravnanje teksta: centar;
 }
-/* Google & Apple stiliziranje gumba */
+
 .prijava_obrazac .login_opcija {
     prikaz: flex;
     širina: 100%;
@@ -69,7 +67,7 @@ tijelo {
     položaj: relativno;
     margina-dno: 24px;
 }
-/* Login opcija separator styling */
+
 .prijava_obrazac .separator raspon {
     pozadina: #fff;
     z-index: 1;
@@ -91,7 +89,6 @@ oblik .input_box oznaka {
     težina fonta: 500;
     margina-dno: 8px;
 }
-/* Stiliziranje ulaznog polja */
 oblik .input_box ulaz {
     širina: 100%;
     visina: 57px;

@@ -1,130 +1,129 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
 *{
-  marža: 0;
+  margina: 0;
   podstava: 0;
-  nacrt: nema;
+  obris: nijedan;
   veličina kutije: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-familija: 'Poppins', sans-serif;
 }
 tijelo{
   visina: 100vh;
   širina: 100%;
-  pozadina: linearni gradijent (115 stupnjeva, #56d8e4 10%, #9f01ea 90%);
+  pozadina: linearni gradijent(115 deg, #56d8e4 10%, #9f01ea 90%);
 }
 .show-btn{
   pozadina: #fff;
-  padding: 10px 20px;
+  podstava: 10px 20px;
   veličina fonta: 20px;
   težina fonta: 500;
   boja: #3498db;
-  pokazivač: pokazivač;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+  kursor: pokazivač;
+  kutija-sjena: 0px 0px 10px rgba(0,0,0,0.1);
 }
 .show-btn, .kontejner{
-  položaj: apsolutni;
-  vrh: 50%;
+  položaj: apsolutno;
+  top: 50%;
   lijevo: 50%;
-  transformiraj: prevedi(-50%, -50%);
+  transformirati: prevedi(-50%, -50%);
 }
-
-input[type="checkbox"]{
-  prikaz: nema;
+ulaz[tip="checkbox"]{
+  prikaz: nijedan;
 }
 .kontejner{
-  prikaz: nema;
+  prikaz: nijedan;
   pozadina: #fff;
   širina: 410px;
   podstava: 30px;
-  sjenilo: 0 0 8px rgba(0,0,0,0.1);
+  kutija-sjena: 0 0 8px rgba(0,0,0,0.1);
 }
 #show:provjereno ~ .kontejner{
   prikaz: blok;
 }
-.kontejner .close-btn{
-  položaj: apsolutni;
+.kontejner .zatvori-btn{
+  položaj: apsolutno;
   desno: 20px;
   top: 15px;
   veličina fonta: 18px;
-  pokazivač: pokazivač;
+  kursor: pokazivač;
 }
-.kontejner .close-btn:hover{
+.kontejner .zatvori-btn:hover{
   boja: #3498db;
 }
 .kontejner .tekst{
-  font-veličina: 35px;
+  veličina fonta: 35px;
   težina fonta: 600;
   poravnanje teksta: centar;
 }
-.kontejnerski obrazac{
+.kontejner oblik{
   margin-top: -20px;
 }
-.kontejnerski obrazac .data{
+.kontejner oblik .podaci{
   visina: 45px;
   širina: 100%;
-  marža: 40px 0;
+  margina: 40px 0;
 }
-obrazac .oznaka podataka{
+oblik .podaci oznaka{
   veličina fonta: 18px;
 }
-obrazac .unos podataka{
+oblik .podaci ulaz{
   visina: 100%;
   širina: 100%;
-  padding-left: 10px;
+  padding-lijevo: 10px;
   veličina fonta: 17px;
-  granica: 1 px čvrsto srebro;
+  granica: 1px čvrsto srebro;
 }
-obrazac .unos podataka:focus{
+oblik .podaci ulaz:fokus{
   boja obruba: #3498db;
-  širina ruba-dna: 2px;
+  širina granice-dna: 2px;
 }
-obrazac .forgot-pass{
+oblik .zaboravio-prošao{
   margin-top: -8px;
 }
-obrazac .forgot-pass a{
+oblik .zaboravio-prošao a{
   boja: #3498db;
-  tekstualna dekoracija: nema;
+  tekstualna dekoracija: nijedan;
 }
-obrazac .forgot-pass a:hover{
-  tekstualna dekoracija: podcrtano;
+oblik .zaboravio-prošao a:hover{
+  tekstualna dekoracija: podcrtati;
 }
-obrazac.btn{
-  marža: 30px 0;
+oblik .btn{
+  margina: 30px 0;
   visina: 45px;
   širina: 100%;
-  položaj: relativni;
-  preljev: skriven;
+  položaj: relativno;
+  prelijevanje: skriveno;
 }
-obrazac .btn.inner{
+oblik .btn .inner{
   visina: 100%;
   širina: 300%;
-  položaj: apsolutni;
+  položaj: apsolutno;
   lijevo: -100%;
   z-index: -1;
-  pozadina: -webkit-linear-gradient(desno, #56d8e4, #9f01ea, #56d8e4, #9f01ea);
-  prijelaz: sve 0,4s;
+  pozadina: -webkit-linear-gradient(točno, #56d8e4, #9f01ea, #56d8e4, #9f01ea);
+  tranzicija: svi 0.4s;
 }
-obrazac .btn:hover.inner{
+oblik .btn:hover .inner{
   lijevo: 0;
 }
-obrazac .btn gumb{
+oblik .btn gumb{
   visina: 100%;
   širina: 100%;
-  pozadina: nema;
-  granica: nema;
+  pozadina: nijedan;
+  granica: nijedan;
   boja: #fff;
   veličina fonta: 18px;
   težina fonta: 500;
   transformacija teksta: velika slova;
   razmak između slova: 1px;
-  pokazivač: pokazivač;
+  kursor: pokazivač;
 }
-obrazac .signup-link{
+oblik .signup-link{
   poravnanje teksta: centar;
 }
-obrazac .signup-link a{
+oblik .signup-link a{
   boja: #3498db;
-  tekstualna dekoracija: nema;
+  tekstualna dekoracija: nijedan;
 }
-obrazac .signup-link a:hover{
-  tekstualna dekoracija: podcrtano;
+oblik .signup-link a:hover{
+  tekstualna dekoracija: podcrtati;
 }
